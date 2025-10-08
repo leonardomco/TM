@@ -11,8 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math as m
 import numpy as np
-fastf1.Cache.enable_cache(r"C:\Users\leona\OneDrive\Desktop\TM\Caches") # evite de re load les données à chaque fois
-pd.set_option("display.max_columns", None)  # show all columns
+
 
 
 # In[3]:
@@ -404,3 +403,4 @@ plt.show()
 
 
 """
+
