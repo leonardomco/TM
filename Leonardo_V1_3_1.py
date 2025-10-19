@@ -88,7 +88,7 @@ def data (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> pd.DataF
     ay = np.square(vx) * C
 
     # Remove extreme values
-    indexProblems = np.abs(ay) > 150
+    indexProblems = np.abs(ay) > 60
     ay[indexProblems] = 0
     
     # Smooth y-acceleration
@@ -403,4 +403,5 @@ plt.show()
 
 
 """
+
 
