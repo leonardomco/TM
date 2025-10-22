@@ -204,22 +204,22 @@ def data (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> pd.DataF
         print(max(f0 + f1 * v + f2 * v**2))
         return f0 + f1 * v + f2 * v**2"""
 
-    Cfr = 0.015
-    
+    Cfr_moy = 0.015
+    Cfr_min = 0.01
+    Cfr_max = 0.02
+
     telemetry['Force de frottement de roulement min'] = (
-        2 * (Cfr) * ((P_min + telemetry['Force pesanteur_min'])/4) +
-        2 * (Cfr) * ((P_min + telemetry['Force pesanteur_min'])/4)
+        4 * (Cfr_min) * ((P_min + telemetry['Force pesanteur_min']) / 4)
     )
 
     telemetry['Force de frottement de roulement moy'] = (
-        2 * (Cfr) * ((P_moy + telemetry['Force pesanteur_moy'])/4) +
-        2 * (Cfr) * ((P_moy + telemetry['Force pesanteur_moy'])/4)
+        4 * (Cfr_moy) * ((P_moy + telemetry['Force pesanteur_moy']) / 4)
     )
 
     telemetry['Force de frottement de roulement max'] = (
-        2 * (Cfr) * ((P_max + telemetry['Force pesanteur_max'])/4) +
-        2 * (Cfr) * ((P_max + telemetry['Force pesanteur_max'])/4)
+        4 * (Cfr_max) * ((P_max + telemetry['Force pesanteur_max']) / 4)
     )
+
 
 
 
@@ -403,6 +403,7 @@ plt.show()
 
 
 """
+
 
 
 
