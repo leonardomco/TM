@@ -4,3 +4,4 @@ numpy
 matplotlib
 fastf1
 scipy
+plotly
