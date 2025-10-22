@@ -4,15 +4,12 @@
 # In[2]:
 
 
-import os
-os.environ['FASTF1_NO_ERGAST'] = '1'
+
 import fastf1
 import pandas as pd
 import matplotlib.pyplot as plt
 import math as mt
 import numpy as np
-fastf1.Cache.enable_cache(r"C:\Users\leona\OneDrive\Desktop\TM\Caches") # evite de re load les données à chaque fois
-pd.set_option("display.max_columns", None)  # show all columns
 from scipy.signal import savgol_filter
 #pd.set_option("display.max_rows", None)
 
@@ -308,5 +305,6 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
     return telemetry, rotated_track, circuit_info, df_corners
 
 cinématique(a_gen, c_gen, s_gen,p_gen, 3, 9, 9)
+
 
 
