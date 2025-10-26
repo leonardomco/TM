@@ -55,7 +55,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
 
     # Clean up outliers
     for i in np.arange(1, len(ax) - 1).astype(int):
-        if ax[i] > 25:
+        if ax[i] > 22.5:
             ax[i] = ax[i - 1]
 
     # Smooth x-acceleration
@@ -93,7 +93,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
     ay = np.square(vx) * C
 
     # Remove extreme values
-    for i in np.where(np.abs(ay) > 75)[0]:
+    for i in np.where(np.abs(ay) > 90)[0]:
         ay[i] = ay[i - 1] if i > 0 else ay[i + 1]
     
     # Smooth y-acceleration
@@ -116,7 +116,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
     az = np.square(vx) * z_C
 
     # Remove extreme values
-    for i in np.where(np.abs(az) > 150)[0]:
+    for i in np.where(np.abs(az) > 120)[0]:
         az[i] = az[i - 1] if i > 0 else az[i + 1]
 
     a_long_smooth = savgol_filter(ax, window_length=9, polyorder=3)
@@ -305,6 +305,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
     return telemetry, rotated_track, circuit_info, df_corners
 
 cinématique(a_gen, c_gen, s_gen,p_gen, 3, 9, 9)
+
 
 
 
