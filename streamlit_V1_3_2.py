@@ -11,7 +11,7 @@ st.title("Télémetrie Formule 1")
 # Sidebar controls
 st.sidebar.header("Sélection de la session")
 annee = st.sidebar.selectbox("Année", range(2018, 2026))
-circuit = st.sidebar.selectbox("Circuit", ['Monza', 'Silverstone', 'Spa'])
+circuit = st.sidebar.selectbox("Circuit", ['Monza', 'Silverstone', 'Spa-Francorchamps'])
 session = st.sidebar.selectbox("Session", ['Qualifying', 'Race', 'Practice 1'])
 pilote = st.sidebar.text_input("Abréviation du pilote (ex: VER, LEC)", "")
 show_corners = True
@@ -739,3 +739,4 @@ if st.sidebar.button("Charger les données"):
 
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement ou de l'affichage des données : {e}")
+
