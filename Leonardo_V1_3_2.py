@@ -85,7 +85,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
 
     # Clean up outliers
     for i in np.arange(1, len(dtheta) - 1).astype(int):
-        if abs(dtheta[i]) > 0.5:
+        if abs(dtheta[i]) > 0.135:
             dtheta[i] = dtheta[i - 1]
 
     # Calculate curvature and lateral acceleration
@@ -108,7 +108,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
 
     # Clean up outliers
     for i in np.arange(1, len(z_dtheta) - 1).astype(int):
-        if abs(z_dtheta[i]) > 0.5:
+        if abs(z_dtheta[i]) > 0.135:
             z_dtheta[i] = z_dtheta[i - 1]
 
     # Calculate z-curvature and vertical acceleration
@@ -305,6 +305,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
     return telemetry, rotated_track, circuit_info, df_corners
 
 cinématique(a_gen, c_gen, s_gen,p_gen, 3, 9, 9)
+
 
 
 
