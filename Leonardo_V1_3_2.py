@@ -28,7 +28,7 @@ p_gen = 'Lec'
 # In[ ]:
 
 
-def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> pd.DataFrame:
+def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
 
 
     epreuve = fastf1.get_session(annee, circuit, session)
@@ -304,7 +304,7 @@ def cinématique (annee,circuit,session,pilote, Nax: int, Nay: int, Naz:int) -> 
 
     return telemetry, rotated_track, circuit_info, df_corners
 
-cinématique(a_gen, c_gen, s_gen,p_gen, 3, 9, 9)
+
 
 
 
