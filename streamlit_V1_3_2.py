@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-from Leonardo_V1_3_2 import cinématique
+from Leonardo_V1_3_2 import donnees
 
 st.set_page_config(page_title="Télémetrie Formule 1", layout="wide")
 st.title("Télémetrie Formule 1")
@@ -20,7 +20,7 @@ show_corners = True
 # Cache data loading
 @st.cache_data
 def load_data(a, c, s, p):
-    return cinématique(a, c, s, p,)
+    return donnees(a, c, s, p,)
 
 # Load Data
 if st.sidebar.button("Charger les données"):
@@ -665,6 +665,7 @@ if st.sidebar.button("Charger les données"):
 
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement ou de l'affichage des données : {e}")
+
 
 
 
