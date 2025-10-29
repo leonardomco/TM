@@ -1,5 +1,3 @@
-
-
 import fastf1
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,14 +5,7 @@ import math as mt
 import numpy as np
 from scipy.signal import savgol_filter
 
-
-a_gen = 2018
-c_gen = 'Monza'
-s_gen = 'Q'
-p_gen = 'Lec'
-
-
-def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
+def donnees (annee,circuit,session,pilote) -> pd.DataFrame:
 
 
     epreuve = fastf1.get_session(annee, circuit, session)
@@ -26,10 +17,6 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     df_corners = circuit_info.corners
     df_corners = df_corners.loc[:, ["Number", "Distance"]]
 
-    
-    #pos = pd.concat([pos, pos.iloc[[0]]], ignore_index=True)          # Permet que qd je plot y(x) le circuit soit fermé mais à 
-    #                                                                    revoir pcq ça me nique mon plot des nouvelles accels
-    
     telemetry: pd.DataFrame = tour.get_telemetry().copy()
 
     vx = telemetry["Speed"] / 3.6
@@ -39,32 +26,23 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     dtime = np.gradient(time_float)
     ax = np.gradient(vx) / dtime
 
-    # Clean up outliers
     for i in np.arange(1, len(ax) - 1).astype(int):
         if ax[i] > 22.5:
             ax[i] = ax[i - 1]
 
-    # Smooth x-acceleration
-    
-
-    # Get position data
     x = telemetry["X"]
     y = telemetry["Y"]
     z = telemetry["Z"]
     telemetry['Altitude'] = telemetry['Z'] - telemetry['Z'].iloc[0]
 
-    # Calculate gradients
     dx = np.gradient(x)
     dy = np.gradient(y)
     dz = np.gradient(z)
-    
 
-    # Calculate theta (angle in xy-plane)
     theta = np.arctan2(dy, (dx + np.finfo(float).eps))
     theta[0] = theta[1]
     theta_noDiscont = np.unwrap(theta)
 
-    # Calculate distance and curvature
     dist = telemetry["Distance"]
     ds = np.gradient(dist)
     dtheta = np.gradient(theta_noDiscont)
@@ -74,34 +52,25 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
         if abs(dtheta[i]) > 0.135:
             dtheta[i] = dtheta[i - 1]
 
-    # Calculate curvature and lateral acceleration
-    C = dtheta / (ds + 0.0001)  # To avoid division by 0
+    C = dtheta / (ds + 0.0001)  
     ay = np.square(vx) * C
 
-    # Remove extreme values
     for i in np.where(np.abs(ay) > 90)[0]:
         ay[i] = ay[i - 1] if i > 0 else ay[i + 1]
     
-    # Smooth y-acceleration
-    
-
-    # Calculate z-acceleration (similar process)
     z_theta = np.arctan2(dz, (dx + np.finfo(float).eps))
     z_theta[0] = z_theta[1]
     z_theta_noDiscont = np.unwrap(z_theta)
 
     z_dtheta = np.gradient(z_theta_noDiscont)
 
-    # Clean up outliers
     for i in np.arange(1, len(z_dtheta) - 1).astype(int):
         if abs(z_dtheta[i]) > 0.135:
             z_dtheta[i] = z_dtheta[i - 1]
 
-    # Calculate z-curvature and vertical acceleration
     z_C = z_dtheta / (ds + 0.0001)
     az = np.square(vx) * z_C
 
-    # Remove extreme values
     for i in np.where(np.abs(az) > 120)[0]:
         az[i] = az[i - 1] if i > 0 else az[i + 1]
 
@@ -114,9 +83,6 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     telemetry["Accélération normale"] = a_lat_smooth
     telemetry["Accélération verticale"] = az_smooth
 
-
-
-
     if annee < 2018 or annee > 2025:
         print ('Erreur: année non accéptée')
         return
@@ -125,10 +91,10 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     compound = tour['Compound']
 
     meteo = tour.get_weather_data().copy()
-    humidité_relative = meteo["Humidity"]/100   #pour avoir la valeur comprise entre 0 et 1 
-    presssion = meteo["Pressure"] * 100     #pour avoir la pression en Pa
+    humidité_relative = meteo["Humidity"]/100   
+    presssion = meteo["Pressure"] * 100     
     temp_C = meteo["AirTemp"]
-    Rs =  287.058   # constante spécifique de l'air sec
+    Rs =  287.058   
 
     exp_term = np.exp((17.5043 * temp_C) / (241.2 + temp_C))
     rho = (1 / (Rs * (temp_C + 273.15))) * (presssion - 230.617 * humidité_relative * exp_term)
@@ -156,8 +122,6 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
 
     c['cl_max'] = c['cl_moy'] + 0.1 * c['cl_moy']
     c['cl_min'] = c['cl_moy'] - 0.1 * c['cl_moy']
-
-
 
     m_moy = m.loc[annee, 'm_moy']
     m_min = m.loc[annee, 'm_min']
@@ -213,12 +177,10 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
         (telemetry['Throttle'] < 5)
     )
 
-    # --- Cas 1 : Freinage ---
+
     telemetry.loc[brake_condition, ['Force motrice max', 'Force motrice moy', 'Force motrice min']] = 0
 
-    # Pendant le freinage :
-    # ΣF = m*a  =>  F_frein = -(m*a) + Ff + FD
-    # On prend la valeur absolue pour avoir une force positive
+    
     telemetry.loc[brake_condition, 'Force de freinage max'] = np.abs(
         (m_max * telemetry.loc[brake_condition, 'Accélération tangentielle']) +
         (telemetry.loc[brake_condition, 'Force de frottement de roulement min'] +
@@ -238,11 +200,10 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     )
 
 
-    # --- Cas 2 : Pas de freinage ---
+    
     no_brake_condition = ~brake_condition
 
-    # Pendant la motricité :
-    # ΣF = m*a  =>  Fm = m*a + Ff + FD
+
     telemetry.loc[no_brake_condition, 'Force motrice max'] = (
         (m_max * telemetry.loc[no_brake_condition, 'Accélération tangentielle']) +
         (telemetry.loc[no_brake_condition, 'Force de frottement de roulement min'] +
@@ -261,17 +222,13 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
         telemetry.loc[no_brake_condition, 'Trainée_max'])
     )
 
-    # Pendant l'accélération, il n'y a pas de force de freinage
+  
     telemetry.loc[no_brake_condition, ['Force de freinage max', 'Force de freinage moy', 'Force de freinage min']] = 0
 
-    # --- Post-traitement : éliminer les valeurs motrices négatives (logiquement impossibles)
+
     telemetry['Force motrice max'] = telemetry['Force motrice max'].clip(lower=0)
     telemetry['Force motrice moy'] = telemetry['Force motrice moy'].clip(lower=0)
     telemetry['Force motrice min'] = telemetry['Force motrice min'].clip(lower=0)
-
-        
-        
-
 
 
     track = pos.loc[:, ('X', 'Y')].to_numpy()
@@ -286,14 +243,6 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
     rotated_track = np.vstack([rotated_track, rotated_track[0]])
 
     
-
-
     return telemetry, rotated_track, circuit_info, df_corners
-
-
-
-
-
-
 
 
