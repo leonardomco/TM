@@ -132,7 +132,7 @@ if st.sidebar.button("Charger les données"):
                 width=800,
                 height=600,
                 hovermode='x unified', 
-                plot_bgcolor='rgba(0,0,0,0)',  
+                plot_bgcolor='rgba(0,0,0,0)') 
 
             fig_alt.update_traces(
                 hovertemplate="Distance: %{x:.1f} m<br>Altitude: %{y:.1f} m<extra></extra>"
@@ -665,5 +665,6 @@ if st.sidebar.button("Charger les données"):
 
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement ou de l'affichage des données : {e}")
+
 
 
