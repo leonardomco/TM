@@ -20,13 +20,12 @@ show_corners = True
 # Cache data loading
 @st.cache_data
 def load_data(a, c, s, p):
-    return cinématique(a, c, s, p, 3, 3, 9)
+    return cinématique(a, c, s, p,)
 
 # Load Data
 if st.sidebar.button("Charger les données"):
     with st.spinner("Chargement des données..."):
         try:
-            # ✅ Unpack
             donnees, track, circuit_info, df_corners = load_data(annee, circuit, session, pilote)
 
             X = track[:, 0]
@@ -34,7 +33,6 @@ if st.sidebar.button("Charger les données"):
 
             st.success("✅ Données chargées avec succès !")
 
-            # --- TRAJECTOIRE ---
             st.subheader('Trajectoire')
             fig_traj = go.Figure()
 
@@ -45,11 +43,8 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='blue', width=2),
             ))
 
-            # =======================================================
-            # 🏁 ADD CORNER NUMBERS (like your matplotlib code)
-            # =======================================================
             if show_corners and hasattr(circuit_info, "corners"):
-                offset_vector = np.array([500, 0])  # Arbitrary offset length
+                offset_vector = np.array([500, 0])  
 
                 def rotate(xy, *, angle):
                     rot_mat = np.array([
@@ -64,16 +59,13 @@ if st.sidebar.button("Charger les données"):
                     txt = f"{corner['Number']}{corner['Letter']}"
                     offset_angle = corner['Angle'] / 180 * np.pi
 
-                    # 1️⃣ Compute offset position before rotation
                     offset_x, offset_y = rotate(offset_vector, angle=offset_angle)
                     text_x = corner['X'] + offset_x
                     text_y = corner['Y'] + offset_y
 
-                    # 2️⃣ Rotate text position & corner center by circuit rotation
                     text_x, text_y = rotate(np.array([text_x, text_y]), angle=track_angle)
                     track_x, track_y = rotate(np.array([corner['X'], corner['Y']]), angle=track_angle)
 
-                    # 3️⃣ Add connection line
                     fig_traj.add_trace(go.Scatter(
                         x=[track_x, text_x],
                         y=[track_y, text_y],
@@ -82,7 +74,6 @@ if st.sidebar.button("Charger les données"):
                         showlegend=False
                     ))
 
-                    # 4️⃣ Add circle marker for the corner label
                     fig_traj.add_trace(go.Scatter(
                         x=[text_x],
                         y=[text_y],
@@ -93,11 +84,6 @@ if st.sidebar.button("Charger les données"):
                         textfont=dict(color="white", size=10),
                         showlegend=False
                     ))
-
-            # =======================================================
-            # 🏷️ Title annotation and layout
-            # =======================================================
-            
 
             fig_traj.update_layout(
                 xaxis_title="Coordonnées X",
@@ -113,8 +99,6 @@ if st.sidebar.button("Charger les données"):
             st.subheader("Altitude")
 
             fig_alt = go.Figure()
-
-            # Main altitude trace
             fig_alt.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Altitude"],
@@ -123,56 +107,44 @@ if st.sidebar.button("Charger les données"):
                 name='Altitude'
             ))
 
-            # Add annotation title
-        
-
-            # 👉 Add vertical lines and labels for corners
             for _, row in df_corners.iterrows():
-                # Vertical dashed line
                 fig_alt.add_vline(
                     x=row["Distance"],
                     line=dict(color="white", dash="dash", width=1),
                     opacity=1
                 )
 
-                # Corner number label (rotated text)
                 fig_alt.add_annotation(
                     x=row["Distance"],
-                    y=min(donnees["Altitude"]) - 20,   # 👈 slightly below the bottom of the plot
+                    y=min(donnees["Altitude"]) - 20,   
                     text=str(int(row["Number"])),
                     showarrow=False,
                     xanchor="center",
-                    yanchor="top",                    # anchor text from the top so it sits just below the line
-                    textangle=0,                      # horizontal text
+                    yanchor="top",                    
+                    textangle=0,                      
                     font=dict(size=16, color="white"),
                     align="center"
                 )
-            # Layout settings
+
             fig_alt.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Altitude (m)",
                 width=800,
                 height=600,
                 hovermode='x unified', 
-                plot_bgcolor='rgba(0,0,0,0)',  # Optional: transparent background
-            )
+                plot_bgcolor='rgba(0,0,0,0)',  
 
             fig_alt.update_traces(
                 hovertemplate="Distance: %{x:.1f} m<br>Altitude: %{y:.1f} m<extra></extra>"
             )
 
-            # Display the plot in Streamlit
             st.plotly_chart(fig_alt, use_container_width=True)
-
 
             st.subheader("Vitesse")
 
             fig_vit = go.Figure()
 
-            # --- Base data ---
             vx_ms = donnees["vx"]
-
-            # Visible blue line (m/s)
             fig_vit.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=vx_ms,
@@ -181,8 +153,6 @@ if st.sidebar.button("Charger les données"):
                 yaxis="y1"
             ))
 
-
-            # --- Corner lines ---
             for _, row in df_corners.iterrows():
                 fig_vit.add_vline(
                     x=row["Distance"],
@@ -200,17 +170,13 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout with both y-axes on the left ---
             fig_vit.update_layout(
                 xaxis=dict(title="Distance (m)"),
-
-                # Primary y-axis (m/s)
                 yaxis=dict(
                     title=dict(text="Vitesse (m/s)", font=dict(color="white")),
                     tickfont=dict(color="white"),
-                    title_standoff=30,  # add some spacing
+                    title_standoff=30,  
                 ),
-
                 width=800,
                 height=600,
                 hovermode='x unified', 
@@ -221,16 +187,12 @@ if st.sidebar.button("Charger les données"):
                 hovertemplate="Distance: %{x:.1f} m<br>Vitesse : %{y:.1f} m/s<extra></extra>"
             )
 
-            # --- Display ---
+
             st.plotly_chart(fig_vit, use_container_width=True)
-
-
-
 
             st.subheader("Accélération tangentielle")
             fig_a_t = go.Figure()
 
-            # Main altitude trace
             fig_a_t.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Accélération tangentielle"],
@@ -239,51 +201,43 @@ if st.sidebar.button("Charger les données"):
                 name='A_t'
             ))
 
-            # Add annotation title
-        
 
-            # 👉 Add vertical lines and labels for corners
             for _, row in df_corners.iterrows():
-                # Vertical dashed line
                 fig_a_t.add_vline(
                     x=row["Distance"],
                     line=dict(color="white", dash="dash", width=1),
                     opacity=1
                 )
 
-                # Corner number label (rotated text)
                 fig_a_t.add_annotation(
                     x=row["Distance"],
-                    y=min(donnees["Accélération tangentielle"]) - 20,   # 👈 slightly below the bottom of the plot
+                    y=min(donnees["Accélération tangentielle"]) - 20,   
                     text=str(int(row["Number"])),
                     showarrow=False,
                     xanchor="center",
-                    yanchor="top",                    # anchor text from the top so it sits just below the line
-                    textangle=0,                      # horizontal text
+                    yanchor="top",                    
+                    textangle=0,                     
                     font=dict(size=16, color="white"),
                     align="center"
                 )
-            # Layout settings
             fig_a_t.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Accélération tangentielle (m/s^2)",
                 width=800,
                 height=600,
                 hovermode='x unified', 
-                plot_bgcolor='rgba(0,0,0,0)',  # Optional: transparent background
+                plot_bgcolor='rgba(0,0,0,0)',  
             )
 
             fig_a_t.update_traces(
                 hovertemplate="Distance: %{x:.1f} m<br>Accélération tangentielle: %{y:.1f} m/s^2<extra></extra>"
             )
 
-            # Display the plot in Streamlit
             st.plotly_chart(fig_a_t, use_container_width=True)
 
             st.subheader("Accélération normale")
             fig_a_n = go.Figure()
 
-            # Main altitude trace
             fig_a_n.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Accélération normale"],
@@ -292,51 +246,45 @@ if st.sidebar.button("Charger les données"):
                 name='A_n'
             ))
 
-            # Add annotation title
-        
 
-            # 👉 Add vertical lines and labels for corners
             for _, row in df_corners.iterrows():
-                # Vertical dashed line
                 fig_a_n.add_vline(
                     x=row["Distance"],
                     line=dict(color="white", dash="dash", width=1),
                     opacity=1
                 )
 
-                # Corner number label (rotated text)
                 fig_a_n.add_annotation(
                     x=row["Distance"],
-                    y=min(donnees["Accélération normale"]) - 20,   # 👈 slightly below the bottom of the plot
+                    y=min(donnees["Accélération normale"]) - 20,   
                     text=str(int(row["Number"])),
                     showarrow=False,
                     xanchor="center",
-                    yanchor="top",                    # anchor text from the top so it sits just below the line
-                    textangle=0,                      # horizontal text
+                    yanchor="top",                    
+                    textangle=0,                      
                     font=dict(size=16, color="white"),
                     align="center"
                 )
-            # Layout settings
+                
             fig_a_n.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Accélération normale (m/s^2)",
                 width=800,
                 height=600,
                 hovermode='x unified', 
-                plot_bgcolor='rgba(0,0,0,0)',  # Optional: transparent background
+                plot_bgcolor='rgba(0,0,0,0)', 
             )
 
             fig_a_n.update_traces(
                 hovertemplate="Distance: %{x:.1f} m<br>Accélération normale: %{y:.1f} m/s^2<extra></extra>"
             )
 
-            # Display the plot in Streamlit
+
             st.plotly_chart(fig_a_n, use_container_width=True)
 
             st.subheader("Accélération verticale")
             fig_a_v = go.Figure()
 
-            # Main altitude trace
             fig_a_v.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Accélération verticale"],
@@ -345,27 +293,23 @@ if st.sidebar.button("Charger les données"):
                 name='A_v'
             ))
 
-            # Add annotation title
-        
 
-            # 👉 Add vertical lines and labels for corners
             for _, row in df_corners.iterrows():
-                # Vertical dashed line
+
                 fig_a_v.add_vline(
                     x=row["Distance"],
                     line=dict(color="white", dash="dash", width=1),
                     opacity=1
                 )
 
-                # Corner number label (rotated text)
                 fig_a_v.add_annotation(
                     x=row["Distance"],
-                    y=min(donnees["Accélération verticale"]) - 20,   # 👈 slightly below the bottom of the plot
+                    y=min(donnees["Accélération verticale"]) - 20,   
                     text=str(int(row["Number"])),
                     showarrow=False,
                     xanchor="center",
-                    yanchor="top",                    # anchor text from the top so it sits just below the line
-                    textangle=0,                      # horizontal text
+                    yanchor="top",                    
+                    textangle=0,                      
                     font=dict(size=16, color="white"),
                     align="center"
                 )
@@ -376,21 +320,20 @@ if st.sidebar.button("Charger les données"):
                 width=800,
                 height=600,
                 hovermode='x unified', 
-                plot_bgcolor='rgba(0,0,0,0)',  # Optional: transparent background
+                plot_bgcolor='rgba(0,0,0,0)',  
             )
 
             fig_a_v.update_traces(
                 hovertemplate="Distance: %{x:.1f} m<br>Accélération verticale: %{y:.1f} m/s^2<extra></extra>"
             )
 
-            # Display the plot in Streamlit
+
             st.plotly_chart(fig_a_v, use_container_width=True)
 
             st.subheader("Portance")
 
             fig_portance = go.Figure()
 
-            # --- Main mean line ---
             fig_portance.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Portance_moy"],
@@ -399,7 +342,6 @@ if st.sidebar.button("Charger les données"):
                 name='Portance moyenne'
             ))
 
-            # --- Shaded area between Portance max and min ---
             fig_portance.add_trace(go.Scatter(
                 x=pd.concat([donnees["Distance"], donnees["Distance"][::-1]]),
                 y=pd.concat([donnees["Portance_max"], donnees["Portance_min"][::-1]]),
@@ -408,12 +350,12 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='rgba(255,255,255,0)'),
                 name='min–max',
                 showlegend=True,
-                hoverinfo='text',                # 👈 disables automatic "name: y"
-                hovertext='min–max',             # 👈 shows only this text
-                hovertemplate='%{hovertext}<extra></extra>'  # 👈 clean hover (no repetition)
+                hoverinfo='text',               
+                hovertext='min–max',             
+                hovertemplate='%{hovertext}<extra></extra>'  
             ))
 
-            # --- Add vertical corner markers (optional, same style as before) ---
+
             for _, row in df_corners.iterrows():
                 fig_portance.add_vline(
                     x=row["Distance"],
@@ -433,7 +375,6 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout ---
             fig_portance.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Portance (N)",
@@ -445,7 +386,7 @@ if st.sidebar.button("Charger les données"):
                     font_size=13,
                     font_color='white'
                 ),
-                xaxis=dict(showspikes=False),  # hides the top x-value label
+                xaxis=dict(showspikes=False),  
                 showlegend = False
             )
             
@@ -454,13 +395,13 @@ if st.sidebar.button("Charger les données"):
                 hovertemplate="Distance: %{x:.1f} m<br>Portance: %{y:.1f} N<extra></extra>"
             )
 
-            # --- Display in Streamlit ---
+
             st.plotly_chart(fig_portance, use_container_width=True)
 
             st.subheader("Trainée")
             fig_trainee = go.Figure()
 
-            # --- Main mean line ---
+
             fig_trainee.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Trainée_moy"],
@@ -469,7 +410,6 @@ if st.sidebar.button("Charger les données"):
                 name='Portance moyenne'
             ))
 
-            # --- Shaded area between Portance max and min ---
             fig_trainee.add_trace(go.Scatter(
                 x=pd.concat([donnees["Distance"], donnees["Distance"][::-1]]),
                 y=pd.concat([donnees["Trainée_max"], donnees["Trainée_min"][::-1]]),
@@ -478,12 +418,11 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='rgba(255,255,255,0)'),
                 name='min–max',
                 showlegend=True,
-                hoverinfo='text',                # 👈 disables automatic "name: y"
-                hovertext='min–max',             # 👈 shows only this text
-                hovertemplate='%{hovertext}<extra></extra>'  # 👈 clean hover (no repetition)
+                hoverinfo='text',               
+                hovertext='min–max',             
+                hovertemplate='%{hovertext}<extra></extra>'  
             ))
 
-            # --- Add vertical corner markers (optional, same style as before) ---
             for _, row in df_corners.iterrows():
                 fig_trainee.add_vline(
                     x=row["Distance"],
@@ -503,7 +442,7 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout ---
+
             fig_trainee.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Trainée (N)",
@@ -515,7 +454,7 @@ if st.sidebar.button("Charger les données"):
                     font_size=13,
                     font_color='white'
                 ),
-                xaxis=dict(showspikes=False),  # hides the top x-value label
+                xaxis=dict(showspikes=False),  
                 showlegend = False,
             )
 
@@ -528,7 +467,6 @@ if st.sidebar.button("Charger les données"):
             st.subheader("Force de frottement au roulement")
             fig_fr = go.Figure()
 
-            # --- Main mean line ---
             fig_fr.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Force de frottement de roulement moy"],
@@ -537,7 +475,7 @@ if st.sidebar.button("Charger les données"):
                 name='Portance moyenne'
             ))
 
-            # --- Shaded area between Portance max and min ---
+            
             fig_fr.add_trace(go.Scatter(
                 x=pd.concat([donnees["Distance"], donnees["Distance"][::-1]]),
                 y=pd.concat([donnees["Force de frottement de roulement max"], donnees["Force de frottement de roulement min"][::-1]]),
@@ -546,12 +484,11 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='rgba(255,255,255,0)'),
                 name='min–max',
                 showlegend=True,
-                hoverinfo='text',                # 👈 disables automatic "name: y"
-                hovertext='min–max',             # 👈 shows only this text
-                hovertemplate='%{hovertext}<extra></extra>'  # 👈 clean hover (no repetition)
+                hoverinfo='text',               
+                hovertext='min–max',             
+                hovertemplate='%{hovertext}<extra></extra>'  
             ))
 
-            # --- Add vertical corner markers (optional, same style as before) ---
             for _, row in df_corners.iterrows():
                 fig_fr.add_vline(
                     x=row["Distance"],
@@ -571,7 +508,6 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout ---
             fig_fr.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Force de frottement de roulement (N)",
@@ -583,7 +519,7 @@ if st.sidebar.button("Charger les données"):
                     font_size=13,
                     font_color='white'
                 ),
-                xaxis=dict(showspikes=False),  # hides the top x-value label
+                xaxis=dict(showspikes=False),  
                 showlegend = False,
             )
 
@@ -598,7 +534,7 @@ if st.sidebar.button("Charger les données"):
             st.subheader("Force motrice")
             fig_m = go.Figure()
 
-            # --- Main mean line ---
+
             fig_m.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Force motrice moy"],
@@ -607,7 +543,7 @@ if st.sidebar.button("Charger les données"):
                 name='Portance moyenne'
             ))
 
-            # --- Shaded area between Portance max and min ---
+           
             fig_m.add_trace(go.Scatter(
                 x=pd.concat([donnees["Distance"], donnees["Distance"][::-1]]),
                 y=pd.concat([donnees["Force motrice max"], donnees["Force motrice min"][::-1]]),
@@ -616,12 +552,11 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='rgba(255,255,255,0)'),
                 name='min–max',
                 showlegend=True,
-                hoverinfo='text',                # 👈 disables automatic "name: y"
-                hovertext='min–max',             # 👈 shows only this text
-                hovertemplate='%{hovertext}<extra></extra>'  # 👈 clean hover (no repetition)
+                hoverinfo='text',                
+                hovertext='min–max',             
+                hovertemplate='%{hovertext}<extra></extra>'  
             ))
 
-            # --- Add vertical corner markers (optional, same style as before) ---
             for _, row in df_corners.iterrows():
                 fig_m.add_vline(
                     x=row["Distance"],
@@ -641,7 +576,6 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout ---
             fig_m.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Force motrice (N)",
@@ -653,7 +587,7 @@ if st.sidebar.button("Charger les données"):
                     font_size=13,
                     font_color='white'
                 ),
-                xaxis=dict(showspikes=False),  # hides the top x-value label
+                xaxis=dict(showspikes=False), 
                 showlegend = False,
             )
 
@@ -667,7 +601,6 @@ if st.sidebar.button("Charger les données"):
             st.subheader("Force de freinage")
             fig_f = go.Figure()
 
-            # --- Main mean line ---
             fig_f.add_trace(go.Scatter(
                 x=donnees["Distance"],
                 y=donnees["Force de freinage moy"],
@@ -676,7 +609,6 @@ if st.sidebar.button("Charger les données"):
                 name='Portance moyenne'
             ))
 
-            # --- Shaded area between Portance max and min ---
             fig_f.add_trace(go.Scatter(
                 x=pd.concat([donnees["Distance"], donnees["Distance"][::-1]]),
                 y=pd.concat([donnees["Force de freinage max"], donnees["Force de freinage min"][::-1]]),
@@ -685,12 +617,11 @@ if st.sidebar.button("Charger les données"):
                 line=dict(color='rgba(255,255,255,0)'),
                 name='min–max',
                 showlegend=True,
-                hoverinfo='text',                # 👈 disables automatic "name: y"
-                hovertext='min–max',             # 👈 shows only this text
-                hovertemplate='%{hovertext}<extra></extra>'  # 👈 clean hover (no repetition)
+                hoverinfo='text',               
+                hovertext='min–max',             
+                hovertemplate='%{hovertext}<extra></extra>'  
             ))
 
-            # --- Add vertical corner markers (optional, same style as before) ---
             for _, row in df_corners.iterrows():
                 fig_f.add_vline(
                     x=row["Distance"],
@@ -710,7 +641,6 @@ if st.sidebar.button("Charger les données"):
                     align="center"
                 )
 
-            # --- Layout ---
             fig_f.update_layout(
                 xaxis_title="Distance (m)",
                 yaxis_title="Force de freinage (N)",
@@ -722,7 +652,7 @@ if st.sidebar.button("Charger les données"):
                     font_size=13,
                     font_color='white'
                 ),
-                xaxis=dict(showspikes=False),  # hides the top x-value label
+                xaxis=dict(showspikes=False), 
                 showlegend = False,
             )
 
@@ -731,12 +661,9 @@ if st.sidebar.button("Charger les données"):
             )
 
             st.plotly_chart(fig_f, use_container_width=True)
-            
-
-            
-        
 
 
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement ou de l'affichage des données : {e}")
+
 
