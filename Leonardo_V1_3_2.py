@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
 
 
 import fastf1
@@ -11,21 +6,12 @@ import matplotlib.pyplot as plt
 import math as mt
 import numpy as np
 from scipy.signal import savgol_filter
-#pd.set_option("display.max_rows", None)
-
-
-# In[3]:
 
 
 a_gen = 2018
 c_gen = 'Monza'
 s_gen = 'Q'
 p_gen = 'Lec'
-
-
-# ### Data avec 
-
-# In[ ]:
 
 
 def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
@@ -303,6 +289,7 @@ def cinématique (annee,circuit,session,pilote) -> pd.DataFrame:
 
 
     return telemetry, rotated_track, circuit_info, df_corners
+
 
 
 
