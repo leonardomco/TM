@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-from Leonardo_V1_3_2 import donnees
+from Leonardo_V2 import donnees
 
 st.set_page_config(page_title="Télémetrie Formule 1", layout="wide")
 st.title("Télémetrie Formule 1")
